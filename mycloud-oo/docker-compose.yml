@@ -1,0 +1,33 @@
+version: '3'
+services:
+  app:
+    container_name: mycloudapp-server
+    image: nextcloud:fpm
+    restart: unless-stopped
+    expose:
+      - '80'
+      - '9000'
+    volumes:
+      - /mnt/DriveDATA/nextcloud-oo/app_data:/var/www/html
+  onlyoffice-document-server:
+    container_name: mycloudapp-onlyoffice-document-server
+    image: onlyoffice/documentserver:latest
+    restart: unless-stopped
+    environment:
+      - JWT_SECRET=secret
+    expose:
+      - '80'
+      - '443'
+    volumes:
+      - /mnt/DriveDATA/nextcloud-oo/document_data:/var/www/onlyoffice/Data
+      - /mnt/DriveDATA/nextcloud-oo/document_log:/var/log/onlyoffice
+  nginx:
+    container_name: mycloudapp-nginx-server
+    image: nginx
+    restart: unless-stopped
+    ports:
+      - 8215:80
+      - 8216:443
+    volumes:
+      - /mnt/DriveDATA/nextcloud-oo/nginx.conf:/etc/nginx/nginx.conf
+      - /mnt/DriveDATA/nextcloud-oo/app_data:/var/www/html
