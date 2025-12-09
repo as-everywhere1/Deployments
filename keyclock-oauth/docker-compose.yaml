@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: keycloak-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: bzkeyclk
+      POSTGRES_PASSWORD: aPUo56ZCWR
+    volumes:
+      - /mnt/DriveDATA/keycloak/postgres:/var/lib/postgresql/data
+    networks:
+      - keycloak-net
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2
+    container_name: keycloak
+    restart: unless-stopped
+    command: >
+      start
+      --hostname=changeme-url
+      --hostname-strict=false
+      --proxy-headers=xforwarded
+      --http-enabled=true
+      --features=preview,scripts,token-exchange,admin-fine-grained-authz
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: bzkeyclk
+      KC_DB_PASSWORD: aPUo56ZCWR
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8235:8080"
+    depends_on:
+      - postgres
+    networks:
+      - keycloak-net
+    volumes:
+      - /mnt/DriveDATA/keycloak/keycloak:/opt/keycloak/data
+
+networks:
+  keycloak-net:
